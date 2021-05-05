@@ -93,7 +93,8 @@ class AddEmployee(QWidget):
         self.addressEditor = QTextEdit()
         self.addButton = QPushButton("Add")
         self.addButton.setStyleSheet("background-color:orange;font-size:10pt")
-        self.addButton.clicked.connect(self.addEmployee)
+        self.addButton.clicked.connect(self.addEmloyee)
+        #self.addButton.clicked.connect(self.uploadImage)
 
     def layouts(self):
         ###############creating main layouts###############################
@@ -154,7 +155,7 @@ class AddEmployee(QWidget):
             except:
                 QMessageBox.information(self, "Waring", "Person has not been added")
         else:
-            QMessageBox.information(self, "Success", "Person has been added")
+            QMessageBox.information(self, "Warning", "Field can not empty")
 
 def main():
     APP = QApplication(sys.argv)
