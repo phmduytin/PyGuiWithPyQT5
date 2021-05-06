@@ -20,6 +20,7 @@ class Main(QWidget):
     def UI(self):
         self.mainDesign()
         self.layout()
+        self.getEmployees()
 
     def mainDesign(self):
         self.employeeList = QListWidget()
@@ -52,6 +53,12 @@ class Main(QWidget):
         self.newEmployee = AddEmployee()
         self.close()
 
+    def getEmployees(self):
+        query = "SELECT id,name,surname FROM employees"
+        employees = cur.execute(query).fetchall()
+        for employee in employees:
+            self.employeeList.addItem(str(employee[0]) + "-" + employee[1] + " " + employee[2])
+
 
 class AddEmployee(QWidget):
     def __init__(self):
@@ -64,6 +71,9 @@ class AddEmployee(QWidget):
     def UI(self):
         self.mainDesign()
         self.layouts()
+
+    def closeEvent(self, event):
+        self.main = Main()
 
     def mainDesign(self):
         self.setStyleSheet('background-color:white;font-size:12pt;font-family:Times')
@@ -94,7 +104,7 @@ class AddEmployee(QWidget):
         self.addButton = QPushButton("Add")
         self.addButton.setStyleSheet("background-color:orange;font-size:10pt")
         self.addButton.clicked.connect(self.addEmloyee)
-        #self.addButton.clicked.connect(self.uploadImage)
+        # self.addButton.clicked.connect(self.uploadImage)
 
     def layouts(self):
         ###############creating main layouts###############################
@@ -152,10 +162,13 @@ class AddEmployee(QWidget):
                 cur.execute(query, (name, surname, phone, email, img, address))
                 con.commit()
                 QMessageBox.information(self, "Success", "Person has been added")
+                self.close()
+                self.main = Main()
             except:
                 QMessageBox.information(self, "Waring", "Person has not been added")
         else:
             QMessageBox.information(self, "Warning", "Field can not empty")
+
 
 def main():
     APP = QApplication(sys.argv)
