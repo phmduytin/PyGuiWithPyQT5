@@ -21,8 +21,10 @@ class Main(QWidget):
         self.mainDesign()
         self.layout()
         self.getEmployees()
+        self.displayFirstRecord()
 
     def mainDesign(self):
+        self.setStyleSheet("font-size:14pt;font-family:Arial Bold")
         self.employeeList = QListWidget()
         self.btnNew = QPushButton("New")
         self.btnNew.clicked.connect(self.addEmployee)
@@ -58,6 +60,26 @@ class Main(QWidget):
         employees = cur.execute(query).fetchall()
         for employee in employees:
             self.employeeList.addItem(str(employee[0]) + "-" + employee[1] + " " + employee[2])
+
+    def displayFirstRecord(self):
+        query = "SELECT * FROM employees ORDER BY ROWID ASC LIMIT 1"
+        employee = cur.execute(query).fetchone()
+        img = QLabel()
+        img.setPixmap(QPixmap("images/"+employee[5]))
+        name = QLabel(employee[1])
+        surname = QLabel(employee[2])
+        phone = QLabel(employee[3])
+        mail = QLabel(employee[4])
+        address = QLabel(employee[6])
+
+        self.leftLayout.setVerticalSpacing(20)
+        self.leftLayout.addWidget(img)
+        self.leftLayout.addRow("Name: ", name)
+        self.leftLayout.addRow("Surname: ", surname)
+        self.leftLayout.addRow("Phone: ", phone)
+        self.leftLayout.addRow("Mail: ", mail)
+        self.leftLayout.addRow("Address: ", address)
+
 
 
 class AddEmployee(QWidget):
