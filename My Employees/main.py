@@ -31,6 +31,7 @@ class Main(QWidget):
         self.btnNew.clicked.connect(self.addEmployee)
         self.btnUpdate = QPushButton("Update")
         self.btnDelete = QPushButton("Delete")
+        self.btnDelete.clicked.connect(self.deleteEmployee)
 
     def layout(self):
         #############################Layouts#########################
@@ -107,6 +108,28 @@ class Main(QWidget):
         self.leftLayout.addRow("Phone: ", phone)
         self.leftLayout.addRow("Mail: ", mail)
         self.leftLayout.addRow("Address: ", address)
+
+    def deleteEmployee(self):
+        id = self.employeeList.currentItem().text().split('-')[0]
+
+        mbox = QMessageBox.question(self,"Waring","Are you sure to delete this Employee!", QMessageBox.Yes|QMessageBox.No, QMessageBox.No)
+        if mbox==QMessageBox.Yes:
+            try:
+                query = "DELETE FROM employees WHERE id=?"
+                cur.execute(query,(id,))
+                con.commit()
+                QMessageBox.information(self, "Successs!", "Success!")
+                self.employeeList.clear()
+                self.getEmployees()
+            except:
+                QMessageBox.information(self, "Warning!", "Person has not been deleted!")
+
+
+
+
+
+
+
 
 class AddEmployee(QWidget):
     def __init__(self):
