@@ -30,6 +30,7 @@ class Main(QWidget):
         self.btnNew = QPushButton("New")
         self.btnNew.clicked.connect(self.addEmployee)
         self.btnUpdate = QPushButton("Update")
+        self.btnUpdate.clicked.connect(self.updateEmployee)
         self.btnDelete = QPushButton("Delete")
         self.btnDelete.clicked.connect(self.deleteEmployee)
 
@@ -110,24 +111,44 @@ class Main(QWidget):
         self.leftLayout.addRow("Address: ", address)
 
     def deleteEmployee(self):
-        id = self.employeeList.currentItem().text().split('-')[0]
+        if self.employeeList.selectedItems():
+            id = self.employeeList.currentItem().text().split('-')[0]
 
-        mbox = QMessageBox.question(self,"Waring","Are you sure to delete this Employee!", QMessageBox.Yes|QMessageBox.No, QMessageBox.No)
-        if mbox==QMessageBox.Yes:
-            try:
-                query = "DELETE FROM employees WHERE id=?"
-                cur.execute(query,(id,))
-                con.commit()
-                QMessageBox.information(self, "Successs!", "Success!")
-                self.employeeList.clear()
-                self.getEmployees()
-            except:
-                QMessageBox.information(self, "Warning!", "Person has not been deleted!")
+            mbox = QMessageBox.question(self,"Waring","Are you sure to delete this Employee!", QMessageBox.Yes|QMessageBox.No, QMessageBox.No)
+            if mbox==QMessageBox.Yes:
+                try:
+                    query = "DELETE FROM employees WHERE id=?"
+                    cur.execute(query,(id,))
+                    con.commit()
+                    QMessageBox.information(self, "Successs!", "Success!")
+                    self.employeeList.clear()
+                    self.getEmployees()
+                except:
+                    QMessageBox.information(self, "Warning!", "Person has not been deleted!")
+        else:
+            QMessageBox.information(self, "Warning!", "Please select a person to delete!")
 
+    def updateEmployee(self):
+        if self.employeeList.selectedItems():
+            person = self.employeeList.currentItem().text()
+            id = person.split('-')[0]
 
+            self.updateWindow = UpdateEmloyee()
+            self.updateWindow.close()
 
+        else:
+            QMessageBox.information(self,"Warning!!!","Please select a person to update")
 
+class UpdateEmloyee(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Update Employee")
+        self.setGeometry(450,150,350,600)
+        self.UI()
+        self.show()
 
+    def UI(self):
+        pass
 
 
 
