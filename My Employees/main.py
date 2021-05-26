@@ -69,7 +69,7 @@ class Main(QWidget):
         query = "SELECT * FROM employees ORDER BY ROWID ASC LIMIT 1"
         employee = cur.execute(query).fetchone()
         img = QLabel()
-        img.setPixmap(QPixmap("images/"+employee[5]))
+        img.setPixmap(QPixmap("images/" + employee[5]))
         name = QLabel(employee[1])
         surname = QLabel(employee[2])
         phone = QLabel(employee[3])
@@ -93,7 +93,7 @@ class Main(QWidget):
         employeeClick = self.employeeList.currentItem().text().split("-")
         id = employeeClick[0]
 
-        query = "SELECT * FROM employees WHERE id="+id
+        query = "SELECT * FROM employees WHERE id=" + id
         employee = cur.execute(query).fetchone()
         img = QLabel()
         img.setPixmap(QPixmap("images/" + employee[5]))
@@ -115,11 +115,12 @@ class Main(QWidget):
         if self.employeeList.selectedItems():
             id = self.employeeList.currentItem().text().split('-')[0]
 
-            mbox = QMessageBox.question(self,"Waring","Are you sure to delete this Employee!", QMessageBox.Yes|QMessageBox.No, QMessageBox.No)
-            if mbox==QMessageBox.Yes:
+            mbox = QMessageBox.question(self, "Waring", "Are you sure to delete this Employee!",
+                                        QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if mbox == QMessageBox.Yes:
                 try:
                     query = "DELETE FROM employees WHERE id=?"
-                    cur.execute(query,(id,))
+                    cur.execute(query, (id,))
                     con.commit()
                     QMessageBox.information(self, "Successs!", "Success!")
                     self.employeeList.clear()
@@ -139,13 +140,14 @@ class Main(QWidget):
             self.close()
 
         else:
-            QMessageBox.information(self,"Warning!!!","Please select a person to update")
+            QMessageBox.information(self, "Warning!!!", "Please select a person to update")
+
 
 class UpdateEmloyee(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Update Employee")
-        self.setGeometry(450,100,350,600)
+        self.setGeometry(450, 100, 350, 600)
         self.UI()
         self.show()
 
@@ -158,30 +160,42 @@ class UpdateEmloyee(QWidget):
 
     def mainDesign(self):
         self.setStyleSheet('background-color:white;font-size:12pt;font-family:Times')
+
+        ##################Get Employee Information################################
+        query = "SELECT * FROM employees WHERE id=?"
+        cur.execute(query, (person_id,))
+        person = cur.fetchone()
         ##################Top Layout Widgets##############################
         self.title = QLabel("Update Person")
         self.title.setStyleSheet('font-size: 24pt;font-family:Arial Bold;')
         self.imgUpdate = QLabel()
-        self.imgUpdate.setPixmap(QPixmap("icons/person.png"))
+        imgUrl = "images/" + person[5]
+        self.imgUpdate.setPixmap(QPixmap(imgUrl))
         ##################Bottom Layout Widgets###########################
+
         self.nameLbl = QLabel("Name :")
         self.nameEntry = QLineEdit()
         self.nameEntry.setPlaceholderText("Enter Employee Name")
+        self.nameEntry.setText(person[1])
         self.surnameLbl = QLabel("Surname :")
         self.surnameEntry = QLineEdit()
         self.surnameEntry.setPlaceholderText("Enter Employee Surname")
+        self.surnameEntry.setText(person[2])
         self.phoneLbl = QLabel("Phone :")
         self.phoneEntry = QLineEdit()
         self.phoneEntry.setPlaceholderText("Enter Employee Phone Number")
+        self.phoneEntry.setText(person[3])
         self.emailLbl = QLabel("Email :")
         self.emailEntry = QLineEdit()
         self.emailEntry.setPlaceholderText("Enter Employee Email")
+        self.emailEntry.setText(person[4])
         self.imgLbl = QLabel("Picture :")
         self.imgButton = QPushButton("Change")
         self.imgButton.setStyleSheet("background-color:orange;font-size:10pt")
-        self.imgButton.clicked.connect(self.ChangeEmployee)
+        self.imgButton.clicked.connect(self.ChangePicture)
         self.addressLbl = QLabel("Address :")
         self.addressEditor = QTextEdit()
+        self.addressEditor.setText(person[6])
         self.updateButton = QPushButton("Update")
         self.updateButton.setStyleSheet("background-color:orange;font-size:10pt")
         self.updateButton.clicked.connect(self.UpdateEmployee)
@@ -213,18 +227,42 @@ class UpdateEmloyee(QWidget):
         self.bottomLayout.addRow("", self.updateButton)
         #################setting main layout################################
         self.setLayout(self.mainLayout)
-    def getEmployeeInformation(self):
-        query = "SELECT * FROM employees WHERE id=?"
-        cur.execute(query,(person_id,))
-        person = cur.fetchall()
-        return person
-
 
     def UpdateEmployee(self):
-        self.getEmployeeInformation()
+        global defaultImg
+        global person_id
+        name = self.nameEntry.text()
+        surname = self.surnameEntry.text()
+        phone = self.phoneEntry.text()
+        email = self.emailEntry.text()
+        img = defaultImg
+        address = self.addressEditor.toPlainText()
 
-    def ChangeEmployee(self):
-        pass
+        if (name and surname and phone != ""):
+            try:
+                query = "UPDATE employees SET name=?, surname=?, phone=?, email=?, img=?, address=? WHERE id=?"
+                cur.execute(query, (name, surname, phone, email, img, address, person_id))
+                con.commit()
+                QMessageBox.information(self, "Success", "Person has been updated")
+                self.close()
+                self.main = Main()
+            except:
+                QMessageBox.information(self, "Waring", "Person has not been update")
+        else:
+            QMessageBox.information(self, "Warning", "Field can not empty")
+
+    def ChangePicture(self):
+        global defaultImg
+        size = (128, 128)
+
+        self.filename, ok = QFileDialog.getOpenFileName(self, "Change picture", "", "Image Files (*jpg *png")
+        if ok:
+            defaultImg = os.path.basename(self.filename)
+            img = Image.open(self.filename)
+            img = img.resize(size)
+            defaultImg = person_id + "." + defaultImg.split('.')[1]
+            img.save("images/{}".format(defaultImg))
+
 
 class AddEmployee(QWidget):
     def __init__(self):
