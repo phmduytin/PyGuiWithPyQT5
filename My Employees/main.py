@@ -7,6 +7,7 @@ from PIL import Image
 con = sqlite3.connect('employees.db')
 cur = con.cursor()
 defaultImg = "person.png"
+person_id = ""
 
 
 class Main(QWidget):
@@ -130,11 +131,12 @@ class Main(QWidget):
 
     def updateEmployee(self):
         if self.employeeList.selectedItems():
+            global person_id
             person = self.employeeList.currentItem().text()
-            id = person.split('-')[0]
+            person_id = person.split('-')[0]
 
             self.updateWindow = UpdateEmloyee()
-            self.updateWindow.close()
+            self.close()
 
         else:
             QMessageBox.information(self,"Warning!!!","Please select a person to update")
@@ -143,14 +145,86 @@ class UpdateEmloyee(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Update Employee")
-        self.setGeometry(450,150,350,600)
+        self.setGeometry(450,100,350,600)
         self.UI()
         self.show()
 
     def UI(self):
+        self.mainDesign()
+        self.layouts()
+
+    def closeEvent(self, event):
+        self.main = Main()
+
+    def mainDesign(self):
+        self.setStyleSheet('background-color:white;font-size:12pt;font-family:Times')
+        ##################Top Layout Widgets##############################
+        self.title = QLabel("Update Person")
+        self.title.setStyleSheet('font-size: 24pt;font-family:Arial Bold;')
+        self.imgUpdate = QLabel()
+        self.imgUpdate.setPixmap(QPixmap("icons/person.png"))
+        ##################Bottom Layout Widgets###########################
+        self.nameLbl = QLabel("Name :")
+        self.nameEntry = QLineEdit()
+        self.nameEntry.setPlaceholderText("Enter Employee Name")
+        self.surnameLbl = QLabel("Surname :")
+        self.surnameEntry = QLineEdit()
+        self.surnameEntry.setPlaceholderText("Enter Employee Surname")
+        self.phoneLbl = QLabel("Phone :")
+        self.phoneEntry = QLineEdit()
+        self.phoneEntry.setPlaceholderText("Enter Employee Phone Number")
+        self.emailLbl = QLabel("Email :")
+        self.emailEntry = QLineEdit()
+        self.emailEntry.setPlaceholderText("Enter Employee Email")
+        self.imgLbl = QLabel("Picture :")
+        self.imgButton = QPushButton("Change")
+        self.imgButton.setStyleSheet("background-color:orange;font-size:10pt")
+        self.imgButton.clicked.connect(self.ChangeEmployee)
+        self.addressLbl = QLabel("Address :")
+        self.addressEditor = QTextEdit()
+        self.updateButton = QPushButton("Update")
+        self.updateButton.setStyleSheet("background-color:orange;font-size:10pt")
+        self.updateButton.clicked.connect(self.UpdateEmployee)
+
+    def layouts(self):
+        ###############creating main layouts###############################
+        self.mainLayout = QVBoxLayout()
+        self.topLayout = QVBoxLayout()
+        self.bottomLayout = QFormLayout()
+
+        #################adding child layout to mainlayout##################
+        self.mainLayout.addLayout(self.topLayout)
+        self.mainLayout.addLayout(self.bottomLayout)
+
+        #############adding widgets to top layouts#########################
+        #################Top Layout#################
+        # self.topLayout.addStretch()
+        self.topLayout.addWidget(self.title)
+        self.topLayout.addWidget(self.imgUpdate)
+        self.topLayout.addStretch()
+        self.topLayout.setContentsMargins(100, 20, 10, 30)
+        ###############Bottom Layout#################
+        self.bottomLayout.addRow(self.nameLbl, self.nameEntry)
+        self.bottomLayout.addRow(self.surnameLbl, self.surnameEntry)
+        self.bottomLayout.addRow(self.phoneLbl, self.phoneEntry)
+        self.bottomLayout.addRow(self.emailLbl, self.emailEntry)
+        self.bottomLayout.addRow(self.imgLbl, self.imgButton)
+        self.bottomLayout.addRow(self.addressLbl, self.addressEditor)
+        self.bottomLayout.addRow("", self.updateButton)
+        #################setting main layout################################
+        self.setLayout(self.mainLayout)
+    def getEmployeeInformation(self):
+        query = "SELECT * FROM employees WHERE id=?"
+        cur.execute(query,(person_id,))
+        person = cur.fetchall()
+        return person
+
+
+    def UpdateEmployee(self):
+        self.getEmployeeInformation()
+
+    def ChangeEmployee(self):
         pass
-
-
 
 class AddEmployee(QWidget):
     def __init__(self):
